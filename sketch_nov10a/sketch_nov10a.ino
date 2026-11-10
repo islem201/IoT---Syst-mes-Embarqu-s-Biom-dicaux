@@ -1,28 +1,27 @@
 #include <WiFi.h>
-#include <esp_wifi.h>
 
-void readMacAddress(){
-  uint8_t baseMac[6];
-  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
-  if (ret == ESP_OK) {
-    Serial.printf("%02x:%02x:%02x:%02x:%02x:%02x\n",
-                  baseMac[0], baseMac[1], baseMac[2],
-                  baseMac[3], baseMac[4], baseMac[5]);
-  } else {
-    Serial.println("Failed to read MAC address");
-  }
-}
+// TODO: Replace with your network credentials
+const char *ssid = "iot";
+const char *password = "iotisis;";
 
-void setup(){
+void setup()
+{
   Serial.begin(115200);
+  delay(1000);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.STA.begin();
+  WiFi.mode(WIFI_STA); // Optional
+  WiFi.begin(ssid, password);
+  Serial.println("\nConnecting");
 
-  Serial.print("[DEFAULT] ESP32 Board MAC Address: ");
-  readMacAddress();
+  while (WiFi.status() != WL_CONNECTED)
+  {
+    Serial.print(".");
+    delay(100);
+  }
+
+  Serial.println("\nConnected to the WiFi network");
+  Serial.print("Local ESP32 IP: ");
+  Serial.println(WiFi.localIP());
 }
- 
-void loop(){
 
-}
+void loop() {}
