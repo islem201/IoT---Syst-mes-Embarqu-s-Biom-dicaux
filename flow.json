@@ -1,0 +1,432 @@
+[
+    {
+        "id": "flux_sante_iot_01",
+        "type": "tab",
+        "label": "Monitoring Santé & Alarme",
+        "disabled": false,
+        "info": "Supervision temps réel MAX30102 + MPU6050 et déclenchement alarme ESP32 Pilotage"
+    },
+    {
+        "id": "ui_base_sante",
+        "type": "ui-base",
+        "name": "Supervision Patient IoT",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true,
+        "allowInstall": false
+    },
+    {
+        "id": "ui_theme_sante",
+        "type": "ui-theme",
+        "name": "Thème Santé",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "ui_page_sante",
+        "type": "ui-page",
+        "name": "Diagnostic Temps Réel",
+        "ui": "ui_base_sante",
+        "path": "/sante",
+        "icon": "heart-pulse",
+        "layout": "grid",
+        "theme": "ui_theme_sante",
+        "breakpoints": [
+            { "name": "Default", "px": "0", "cols": "3" },
+            { "name": "Tablet", "px": "576", "cols": "6" },
+            { "name": "Small Desktop", "px": "768", "cols": "9" },
+            { "name": "Desktop", "px": "1024", "cols": "12" }
+        ],
+        "order": 1,
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "grp_courbes_sante",
+        "type": "ui-group",
+        "name": "Courbes Physiologiques & Mouvement",
+        "page": "ui_page_sante",
+        "width": 8,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "grp_diagnostic_alarme",
+        "type": "ui-group",
+        "name": "Diagnostic & Pilotage Alarme",
+        "page": "ui_page_sante",
+        "width": 4,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "broker_rpi_172",
+        "type": "mqtt-broker",
+        "name": "Broker Mosquitto RPi",
+        "broker": "172.18.32.42",
+        "port": 1883,
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": 4,
+        "keepalive": 60,
+        "cleansession": true,
+        "autoUnsubscribe": true
+    },
+    {
+        "id": "mqtt_in_bpm",
+        "type": "mqtt in",
+        "z": "flux_sante_iot_01",
+        "name": "BPM (MAX30102)",
+        "topic": "esp32/sante/bpm",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_rpi_172",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "fn_prep_sante_chart",
+                "fn_diagnostic_seuils"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_spo2",
+        "type": "mqtt in",
+        "z": "flux_sante_iot_01",
+        "name": "SpO2 (MAX30102)",
+        "topic": "esp32/sante/spo2",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_rpi_172",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "fn_prep_sante_chart",
+                "fn_diagnostic_seuils"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_accel",
+        "type": "mqtt in",
+        "z": "flux_sante_iot_01",
+        "name": "Accéléromètre (MPU6050)",
+        "topic": "esp32/mpu6050/accel",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "broker_rpi_172",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 240,
+        "wires": [
+            [
+                "fn_calcul_norme_accel"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_in_erreur_hw",
+        "type": "mqtt in",
+        "z": "flux_sante_iot_01",
+        "name": "Diagnostic Matériel Slave",
+        "topic": "esp32/diagnostic/erreur",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_rpi_172",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 170,
+        "y": 320,
+        "wires": [
+            [
+                "fn_diagnostic_seuils"
+            ]
+        ]
+    },
+    {
+        "id": "fn_prep_sante_chart",
+        "type": "function",
+        "z": "flux_sante_iot_01",
+        "name": "Formatage Courbe Santé",
+        "func": "let val = Number(msg.payload);\n// On n'affiche pas -1 sur la courbe quand aucun doigt n'est pose\nif (isNaN(val) || val <= 0) {\n    return null;\n}\nif (msg.topic.includes(\"bpm\")) {\n    msg.topic = \"Rythme Cardiaque (BPM)\";\n} else if (msg.topic.includes(\"spo2\")) {\n    msg.topic = \"Saturation SpO2 (%)\";\n}\nmsg.payload = val;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "x": 450,
+        "y": 120,
+        "wires": [
+            [
+                "chart_sante_bpm_spo2"
+            ]
+        ]
+    },
+    {
+        "id": "fn_calcul_norme_accel",
+        "type": "function",
+        "z": "flux_sante_iot_01",
+        "name": "Norme Accélération (m/s²)",
+        "func": "// Calcule la magnitude globale : sqrt(x² + y² + z²)\n// Au repos = ~9.81 m/s²\nlet d = msg.payload;\nif (typeof d === \"string\") {\n    try { d = JSON.parse(d); } catch(e) { return null; }\n}\nif (d && typeof d.x === \"number\" && typeof d.y === \"number\" && typeof d.z === \"number\") {\n    let norme = Math.sqrt(d.x * d.x + d.y * d.y + d.z * d.z);\n    norme = Math.round(norme * 100) / 100;\n    return {\n        topic: \"Accélération Totale (m/s²)\",\n        payload: norme\n    };\n}\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "x": 450,
+        "y": 240,
+        "wires": [
+            [
+                "chart_accel_mpu",
+                "fn_diagnostic_seuils"
+            ]
+        ]
+    },
+    {
+        "id": "chart_sante_bpm_spo2",
+        "type": "ui-chart",
+        "z": "flux_sante_iot_01",
+        "group": "grp_courbes_sante",
+        "name": "Évolution BPM & SpO2",
+        "label": "Constantes Vitales (MAX30102)",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "40",
+        "ymax": "160",
+        "action": "append",
+        "pointShape": "circle",
+        "pointRadius": 3,
+        "showLegend": true,
+        "removeOlder": "5",
+        "removeOlderUnit": "60",
+        "colors": [
+            "#e53935",
+            "#1e88e5"
+        ],
+        "width": 8,
+        "height": 6,
+        "interpolation": "linear",
+        "x": 740,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "chart_accel_mpu",
+        "type": "ui-chart",
+        "z": "flux_sante_iot_01",
+        "group": "grp_courbes_sante",
+        "name": "Évolution Accélération",
+        "label": "Activité / Détection Chute (MPU6050)",
+        "order": 2,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "0",
+        "ymax": "25",
+        "action": "append",
+        "pointShape": "circle",
+        "pointRadius": 3,
+        "showLegend": true,
+        "removeOlder": "5",
+        "removeOlderUnit": "60",
+        "colors": [
+            "#fb8c00"
+        ],
+        "width": 8,
+        "height": 6,
+        "interpolation": "linear",
+        "x": 740,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fn_diagnostic_seuils",
+        "type": "function",
+        "z": "flux_sante_iot_01",
+        "name": "Diagnostic Seuils & Déclenchement Alarme",
+        "func": "// Récupération de la mémoire des dernières mesures\nlet etat = context.get(\"etat\") || {\n    bpm: -1,\n    spo2: -1,\n    accel: 9.81,\n    errHw: 0\n};\n\nlet val = Number(msg.payload);\n\nif (msg.topic === \"esp32/sante/bpm\") etat.bpm = val;\nelse if (msg.topic === \"esp32/sante/spo2\") etat.spo2 = val;\nelse if (msg.topic === \"Accélération Totale (m/s²)\") etat.accel = val;\nelse if (msg.topic === \"esp32/diagnostic/erreur\") etat.errHw = val;\n\ncontext.set(\"etat\", etat);\n\n// ===============================================\n// SEUILS CLINIQUES & PHYSIQUES DE DÉCLENCHEMENT\n// ===============================================\nlet alertes = [];\n\n// 1. Rythme cardiaque anormal (on ignore -1 = pas de doigt)\nif (etat.bpm > 0 && (etat.bpm < 45 || etat.bpm > 120)) {\n    alertes.push(\"BPM critique : \" + etat.bpm + \" bpm\");\n}\n\n// 2. Hypoxie / SpO2 trop basse (on ignore -1 = pas de doigt)\nif (etat.spo2 > 0 && etat.spo2 < 92) {\n    alertes.push(\"SpO2 basse : \" + etat.spo2 + \" %\");\n}\n\n// 3. Chute ou choc brusque (repos = ~9.81 m/s²)\nif (etat.accel > 18.0) {\n    alertes.push(\"Choc / Chute détectée (\" + etat.accel + \" m/s²)\");\n} else if (etat.accel < 3.5) {\n    alertes.push(\"Chute libre détectée (\" + etat.accel + \" m/s²)\");\n}\n\n// 4. Panne matérielle remontée par l'ESP32 Slave\nif (etat.errHw !== 0) {\n    alertes.push(\"Anomalie système (Code \" + etat.errHw + \")\");\n}\n\nlet msgCmdAlarme = null;\nlet msgDashboard = {};\n\nif (alertes.length > 0) {\n    // Envoi de l'ordre ON vers l'ESP32 de Pilotage\n    msgCmdAlarme = { payload: \"ON\" };\n    msgDashboard.payload = \"🚨 ALERTE : \" + alertes.join(\" | \");\n} else {\n    msgDashboard.payload = \"✅ PARAMÈTRES NORMAUX (BPM: \" + (etat.bpm > 0 ? etat.bpm : \"--\") + \", SpO2: \" + (etat.spo2 > 0 ? etat.spo2 + \"%\" : \"--\") + \", Accel: \" + etat.accel + \" m/s²)\";\n}\n\nreturn [msgCmdAlarme, msgDashboard];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "x": 500,
+        "y": 320,
+        "wires": [
+            [
+                "mqtt_out_alarme_cmd"
+            ],
+            [
+                "ui_text_diagnostic"
+            ]
+        ]
+    },
+    {
+        "id": "mqtt_out_alarme_cmd",
+        "type": "mqtt out",
+        "z": "flux_sante_iot_01",
+        "name": "Ordre Alarme -> ESP32 Pilotage",
+        "topic": "esp32/alarme/commande",
+        "qos": "1",
+        "retain": "false",
+        "broker": "broker_rpi_172",
+        "x": 830,
+        "y": 290,
+        "wires": []
+    },
+    {
+        "id": "ui_text_diagnostic",
+        "type": "ui-text",
+        "z": "flux_sante_iot_01",
+        "group": "grp_diagnostic_alarme",
+        "order": 1,
+        "width": 4,
+        "height": 2,
+        "name": "État Diagnostic",
+        "label": "Diagnostic en cours :",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#111111",
+        "x": 800,
+        "y": 350,
+        "wires": []
+    },
+    {
+        "id": "mqtt_in_etat_alarme",
+        "type": "mqtt in",
+        "z": "flux_sante_iot_01",
+        "name": "Retour Bouton ESP32 Pilotage",
+        "topic": "esp32/alarme/etat",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "broker_rpi_172",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 420,
+        "wires": [
+            [
+                "ui_text_etat_buzzer"
+            ]
+        ]
+    },
+    {
+        "id": "ui_text_etat_buzzer",
+        "type": "ui-text",
+        "z": "flux_sante_iot_01",
+        "group": "grp_diagnostic_alarme",
+        "order": 2,
+        "width": 4,
+        "height": 1,
+        "name": "État Sirène / Bouton",
+        "label": "État Boîtier Alarme :",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "x": 490,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "ui_btn_test_alarme",
+        "type": "ui-button",
+        "z": "flux_sante_iot_01",
+        "group": "grp_diagnostic_alarme",
+        "name": "Bouton Test Alarme",
+        "label": "Tester l'Alarme (ON)",
+        "order": 3,
+        "width": 4,
+        "height": 1,
+        "emulateClick": false,
+        "tooltip": "Envoie ON à l'ESP32 Pilotage",
+        "color": "#ffffff",
+        "bgcolor": "#d32f2f",
+        "className": "",
+        "icon": "bell-ring",
+        "iconPosition": "left",
+        "payload": "ON",
+        "payloadType": "str",
+        "topic": "esp32/alarme/commande",
+        "topicType": "str",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "x": 480,
+        "y": 480,
+        "wires": [
+            [
+                "mqtt_out_alarme_cmd"
+            ]
+        ]
+    },
+    {
+        "id": "global_cfg_sante",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.28.0"
+        }
+    }
+]
