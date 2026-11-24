@@ -60,6 +60,7 @@ bool mpuConnected = false;
 
 unsigned long lastSensorCycle = 0;
 unsigned long lastMqttReconnectAttempt = 0;
+const unsigned long INTERVALLE_ENVOI = 1000; // Cadence dynamique : 1 seconde (1000 ms)
 
 // =====================================
 // FONCTIONS I2C SLAVE (DIALOGUE AVEC MASTER)
@@ -128,7 +129,6 @@ void reconnect() {
 
   if (!client.connected()) {
     unsigned long now = millis();
-    // Tentative toutes les 5s sans bloquer l'I2C du Master
     if (now - lastMqttReconnectAttempt >= 5000) {
       lastMqttReconnectAttempt = now;
       Serial.print("Attempting MQTT connection...");
@@ -154,18 +154,10 @@ void setup() {
   // 1. Démarrage du Bus I2C 1 (Capteurs sur IO25/IO26)
   I2C_2.begin(SENSORS_SDA, SENSORS_SCL, 100000);
 
-  if (MAX30102.begin()) {
-    maxConnected = true;
-    MAX30102.sensorStartCollect();
-    Serial.println("MAX30102 initialise avec succes !");
-  } else {
-    maxConnected = false;
-    errorCode = ERR_SENSOR_DISCONNECT;
-    Serial.println("ERREUR : MAX30102 non detecte !");
-  }
-
+  // Initialisation MPU6050 en premier + activation du Bypass I2C
   if (mpu.begin(MPU6050_ADDR, &I2C_2)) {
     mpuConnected = true;
+    mpu.setI2CBypass(true);
     mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
     mpu.setGyroRange(MPU6050_RANGE_500_DEG);
     mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
@@ -174,6 +166,17 @@ void setup() {
     mpuConnected = false;
     errorCode = ERR_SENSOR_DISCONNECT;
     Serial.println("ERREUR : Joy-it MPU6050 non detecte !");
+  }
+
+  // Initialisation MAX30102 sur le même bus IO25/IO26
+  if (MAX30102.begin()) {
+    maxConnected = true;
+    MAX30102.sensorStartCollect();
+    Serial.println("MAX30102 initialise avec succes !");
+  } else {
+    maxConnected = false;
+    errorCode = ERR_SENSOR_DISCONNECT;
+    Serial.println("ERREUR : MAX30102 non detecte !");
   }
 
   // 2. Connexion WiFi & Configuration MQTT
@@ -200,8 +203,8 @@ void loop() {
     client.loop();
   }
 
-  // Cycle de lecture capteurs + diagnostic + publication MQTT toutes les 4 secondes
-  if (millis() - lastSensorCycle >= 4000) {
+  // Cycle de lecture capteurs + diagnostic + publication MQTT chaque 1 seconde
+  if (millis() - lastSensorCycle >= INTERVALLE_ENVOI) {
     lastSensorCycle = millis();
 
     uint8_t currentError = ERR_NONE;
@@ -209,8 +212,8 @@ void loop() {
     // -------------------------------------------------
     // 1. VÉRIFICATION DÉCONNEXION MATÉRIELLE DES CAPTEURS
     // -------------------------------------------------
-    bool maxPresent = checkI2CDevice(MAX30102_ADDR);
     bool mpuPresent = checkI2CDevice(MPU6050_ADDR);
+    bool maxPresent = checkI2CDevice(MAX30102_ADDR);
 
     if (!maxPresent || !mpuPresent) {
       currentError = ERR_SENSOR_DISCONNECT; // Code 2
@@ -225,17 +228,18 @@ void loop() {
     }
 
     // Reconnexion automatique si rebranché
+    if (mpuPresent && !mpuConnected) {
+      if (mpu.begin(MPU6050_ADDR, &I2C_2)) {
+        mpu.setI2CBypass(true);
+        mpuConnected = true;
+        Serial.println("[DIAGNOSTIC] MPU6050 reconnecte !");
+      }
+    }
     if (maxPresent && !maxConnected) {
       if (MAX30102.begin()) {
         MAX30102.sensorStartCollect();
         maxConnected = true;
         Serial.println("[DIAGNOSTIC] MAX30102 reconnecte !");
-      }
-    }
-    if (mpuPresent && !mpuConnected) {
-      if (mpu.begin(MPU6050_ADDR, &I2C_2)) {
-        mpuConnected = true;
-        Serial.println("[DIAGNOSTIC] MPU6050 reconnecte !");
       }
     }
 
@@ -294,7 +298,6 @@ void loop() {
     if (client.connected()) {
       char msgBuffer[80];
 
-      // Toujours publier MAX30102 (même -1 si pas de doigt) pour vérifier le flux sur le Pi
       if (maxConnected) {
         snprintf(msgBuffer, sizeof(msgBuffer), "%d", bpm);
         client.publish(topic_bpm, msgBuffer);
@@ -306,7 +309,6 @@ void loop() {
         client.publish(topic_temp, msgBuffer);
       }
 
-      // Publication MPU6050 en JSON
       if (mpuConnected) {
         snprintf(msgBuffer, sizeof(msgBuffer), "{\"x\":%.2f,\"y\":%.2f,\"z\":%.2f}",
                  a.acceleration.x, a.acceleration.y, a.acceleration.z);
@@ -317,11 +319,10 @@ void loop() {
         client.publish(topic_gyro, msgBuffer);
       }
 
-      // Publication du code diagnostic
       snprintf(msgBuffer, sizeof(msgBuffer), "%d", errorCode);
       client.publish(topic_status, msgBuffer);
 
-      Serial.println("[MQTT] Tous les topics publies vers 172.18.32.42");
+      Serial.println("[MQTT] Donnees publiees (1s)");
     }
   }
 }
