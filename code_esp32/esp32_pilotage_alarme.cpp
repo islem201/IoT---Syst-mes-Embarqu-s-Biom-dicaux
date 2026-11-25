@@ -9,15 +9,16 @@ const char* password    = "iotisis;";
 const char* mqtt_server = "172.18.32.42";
 const int   mqtt_port   = 1883;
 
-// Topics MQTT de pilotage
-const char* topic_cmd_alarme  = "esp32/alarme/commande"; // Reçoit "ON" depuis Node-RED
+// Topics MQTT
+const char* topic_cmd_in      = "esp32/alarme/commande"; // Reçoit "ON" depuis Node-RED
+const char* topic_btn_command = "esp32/alarme/command";  // Publie "on" (appuyé) ou "off" (relâché)
 const char* topic_etat_alarme = "esp32/alarme/etat";     // Publie "ACTIVE" ou "ACQUITTEE"
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 
 // =====================================
-// CONFIGURATION DES BROCHES - NOEUD DE PILOTAGE
+// CONFIGURATION DES BROCHES
 // =====================================
 #define LED_PIN     25  // LED sur IO25
 #define BUTTON_PIN  26  // Bouton relié entre IO26 et GND
@@ -26,13 +27,13 @@ PubSubClient client(espClient);
 // =====================================
 // VARIABLES D'ÉTAT DU SYSTÈME D'ALARME
 // =====================================
-bool alarmeActive = false; // Démarre en veille (attente d'une alerte Node-RED)
+bool alarmeActive = false;
 int dernierEtatBouton = HIGH;
 
 unsigned long dernierBasculement = 0;
 unsigned long lastMqttReconnect  = 0;
 bool phaseAigue = false;
-const unsigned long CADENCE_ALARME = 250; // Alternance toutes les 250 ms
+const unsigned long CADENCE_ALARME = 250;
 
 // =====================================
 // FONCTIONS D'ACTIVATION / ARRÊT DE L'ALARME
@@ -41,7 +42,7 @@ void demarrerAlarme() {
   if (!alarmeActive) {
     alarmeActive = true;
     dernierBasculement = 0;
-    Serial.println("!!! [ALERTE NODE-RED] Declenchement LED + Sirene GT520 !!!");
+    Serial.println("!!! [ALERTE] Declenchement LED + Sirene GT520 !!!");
     if (client.connected()) {
       client.publish(topic_etat_alarme, "ACTIVE");
     }
@@ -53,7 +54,7 @@ void arreterAlarme() {
     alarmeActive = false;
     digitalWrite(LED_PIN, LOW);
     noTone(BUZZER_PIN);
-    Serial.println(">>> [ACQUITTEMENT] Bouton appuye : Systeme d'alerte ARRETE !");
+    Serial.println(">>> [ACQUITTEMENT] Alarme ARRETEE par bouton !");
     if (client.connected()) {
       client.publish(topic_etat_alarme, "ACQUITTEE");
     }
@@ -69,17 +70,17 @@ void callback(char* topic, byte* message, unsigned int length) {
     msgRecu += (char)message[i];
   }
   msgRecu.trim();
+  msgRecu.toUpperCase(); // Accepte "on", "ON", "\"ON\""
 
-  Serial.print("[MQTT] Message recu sur ");
+  Serial.print("[MQTT RECU] Topic: ");
   Serial.print(topic);
-  Serial.print(" : ");
+  Serial.print(" | Payload: ");
   Serial.println(msgRecu);
 
-  if (String(topic) == topic_cmd_alarme) {
-    if (msgRecu == "ON") {
+  if (String(topic) == topic_cmd_in) {
+    if (msgRecu.indexOf("ON") != -1) {
       demarrerAlarme();
     }
-    // Note : conformément à la consigne, seul le bouton physique désactive l'alarme
   }
 }
 
@@ -105,13 +106,17 @@ void reconnect() {
 
   if (!client.connected()) {
     unsigned long now = millis();
-    if (now - lastMqttReconnect >= 5000) {
+    if (now - lastMqttReconnect >= 3000) {
       lastMqttReconnect = now;
       Serial.print("Tentative connexion MQTT...");
-      if (client.connect("ESP32Client_Pilotage_Alarme")) {
+      
+      // ClientID unique pour éviter toute déconnexion mutuelle entre les ESP32
+      String clientId = "ESP32_Pilotage_" + String((uint32_t)ESP.getEfuseMac(), HEX);
+      if (client.connect(clientId.c_str())) {
         Serial.println(" connecte !");
-        client.subscribe(topic_cmd_alarme);
+        client.subscribe(topic_cmd_in);
         client.publish(topic_etat_alarme, alarmeActive ? "ACTIVE" : "VEILLE");
+        client.publish(topic_btn_command, "off");
       } else {
         Serial.print(" echec, rc=");
         Serial.println(client.state());
@@ -138,9 +143,9 @@ void setup() {
   client.setCallback(callback);
 
   Serial.println("=========================================");
-  Serial.println("ESP32 Noeud de Pilotage pret (en veille).");
-  Serial.println("En attente d'alerte sur : esp32/alarme/commande");
-  Serial.println("Appuyez sur le bouton (IO26) pour acquitter.");
+  Serial.println("ESP32 Noeud de Pilotage pret.");
+  Serial.println("Ecoute ordre alarme : esp32/alarme/commande");
+  Serial.println("Publie etat bouton  : esp32/alarme/command (on/off)");
   Serial.println("=========================================");
 }
 
@@ -156,21 +161,33 @@ void loop() {
   unsigned long maintenant = millis();
 
   // -------------------------------------
-  // 1. DÉSACTIVATION UNIQUEMENT PAR BOUTON
+  // 1. GESTION DU BOUTON PHYSIQUE (on / off + arrêt alarme)
   // -------------------------------------
   int etatActuelBouton = digitalRead(BUTTON_PIN);
 
-  if (dernierEtatBouton == HIGH && etatActuelBouton == LOW) {
+  if (etatActuelBouton != dernierEtatBouton) {
     delay(30); // Anti-rebond
-    if (digitalRead(BUTTON_PIN) == LOW) {
-      if (alarmeActive) {
+    etatActuelBouton = digitalRead(BUTTON_PIN);
+
+    if (etatActuelBouton != dernierEtatBouton) {
+      dernierEtatBouton = etatActuelBouton;
+
+      if (etatActuelBouton == LOW) {
+        // Bouton APPUYÉ -> coupe l'alarme et publie command = "on"
+        Serial.println("[BOUTON] Appuye -> command = on");
+        if (client.connected()) {
+          client.publish(topic_btn_command, "on");
+        }
         arreterAlarme();
       } else {
-        Serial.println("[INFO] Bouton appuye (aucune alarme en cours).");
+        // Bouton RELÂCHÉ -> publie command = "off"
+        Serial.println("[BOUTON] Relache -> command = off");
+        if (client.connected()) {
+          client.publish(topic_btn_command, "off");
+        }
       }
     }
   }
-  dernierEtatBouton = etatActuelBouton;
 
   // -------------------------------------
   // 2. SIRÈNE ET CLIGNOTEMENT SI ALARME ACTIVE
@@ -182,10 +199,10 @@ void loop() {
 
       if (phaseAigue) {
         digitalWrite(LED_PIN, HIGH);
-        tone(BUZZER_PIN, 2200); // Ton aigu 2200 Hz
+        tone(BUZZER_PIN, 2200);
       } else {
         digitalWrite(LED_PIN, LOW);
-        tone(BUZZER_PIN, 1400); // Ton grave 1400 Hz
+        tone(BUZZER_PIN, 1400);
       }
     }
   }
