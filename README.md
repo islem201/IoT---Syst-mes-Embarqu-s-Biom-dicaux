@@ -1,4 +1,4 @@
-# 🏥 Système Embarqué Biomédical IoT — Monitoring Vital, Détection de Chute & Diagnostic I2C
+#  Système Embarqué Biomédical IoT — Monitoring Vital, Détection de Chute & Diagnostic I2C
 
 ![Statut](https://img.shields.io/badge/Statut-Opérationnel-brightgreen)
 ![Plateforme](https://img.shields.io/badge/Hardware-3x%20ESP32%20%2B%20Raspberry%20Pi%204-blue)
@@ -11,13 +11,13 @@ Ce système IoT distribué assure la surveillance physiologique en temps réel d
 
 ---
 
-## 📖 Documentation Complète (Wiki GitHub)
+##  Documentation Complète (Wiki GitHub)
 
 L'ensemble de la documentation détaillée (tutoriel pas-à-pas, schémas électriques Cirkit Designer, explications du code, captures Node-RED / MQTT Explorer et validation sur moniteurs série) est disponible dans l'onglet **[Wiki du dépôt](../../wiki)**.
 
 ---
 
-## 🏗️ Architecture du Système
+##  Architecture du Système
 
 Le projet repose sur **trois nœuds ESP32** spécialisés et un **serveur central Raspberry Pi 4** (`172.18.32.42`) :
 
@@ -37,7 +37,7 @@ Le projet repose sur **trois nœuds ESP32** spécialisés et un **serveur centra
 
 ---
 
-## 📂 Structure du Dépôt
+## Structure du Dépôt
 
 ```text
 ├── code_esp32/
