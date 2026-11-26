@@ -1,6 +1,8 @@
 #include "Wire.h"
 
 #define I2C_DEV_ADDR 0x55
+#define I2C_SDA 21
+#define I2C_SCL 22
 
 // =====================================
 // TABLE DES CODES ERREUR
@@ -43,10 +45,10 @@ const char* getErrorMessage(uint8_t code) {
 void setup() {
   Serial.begin(115200);
 
-  // Bus I2C 0 (IO21 SDA / IO22 SCL)
-  Wire.begin();
-  // Evite tout blocage si un fil SDA/SCL est debranche a chaud
-  Wire.setTimeOut(100);
+  // Bus I2C 0 (IO21 SDA / IO22 SCL) à 100 kHz
+  Wire.begin(I2C_SDA, I2C_SCL, 100000);
+  // Timeout à 500 ms : laisse le temps au Slave de finir son cycle MQTT sans faux code 8
+  Wire.setTimeOut(500);
 
   Serial.println("ESP32 Master (Noeud de Diagnostic) initialise");
 }
@@ -59,21 +61,24 @@ void loop() {
 
   uint8_t currentError = ERR_NONE;
 
-  // Demande d'un seul octet au Slave (0x55)
-  uint8_t bytesReceived = Wire.requestFrom(
-    (uint8_t)I2C_DEV_ADDR,
-    (uint8_t)1
-  );
+  // 1. Vérification présence physique du Slave sur le bus IO21/IO22
+  Wire.beginTransmission((uint8_t)I2C_DEV_ADDR);
+  uint8_t txStatus = Wire.endTransmission();
 
-  if (bytesReceived == 1 && Wire.available()) {
-    // Le bus I2C fonctionne : on lit le diagnostic remonte par le Slave (ex: 0, 1, 2, 3...)
-    currentError = Wire.read();
+  if (txStatus == 0) {
+    // 2. Le Slave répond : lecture de l'octet d'erreur
+    uint8_t bytesReceived = Wire.requestFrom((uint8_t)I2C_DEV_ADDR, (uint8_t)1);
+    if (bytesReceived == 1 && Wire.available()) {
+      currentError = Wire.read();
+    } else {
+      currentError = ERR_I2C; // Code 8
+    }
   } else {
-    // Le fil I2C (SDA/SCL) entre Master et Slave est debranche ou le Slave ne repond plus
+    // Fil SDA/SCL débranché ou Slave hors tension
     currentError = ERR_I2C; // Code 8
   }
 
-  // Affichage uniforme via la table des erreurs
+  // Affichage uniforme dans le Serial Monitor du Master
   Serial.println("-----------------------------");
   Serial.print("Code erreur : ");
   Serial.println(currentError);
