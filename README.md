@@ -35,6 +35,11 @@ Le projet repose sur **trois nœuds ESP32** spécialisés et un **serveur centra
 * **Raspberry Pi 4 — Broker Mosquitto & Node-RED Dashboard 2.0 :**
   * Centralise les flux MQTT (`port 1883`), calcule la norme d'accélération $\sqrt{x^2+y^2+z^2}$, vérifie les seuils cliniques ($BPM < 45$ ou $> 120$, $SpO_2 < 92\%$, choc $> 18\,m/s^2$), affiche les courbes/jauges en direct et archive l'historique au format CSV (`mesures_sante.csv`).
 
+
+
+https://github.com/user-attachments/assets/3085b614-1cae-4667-9994-d0454c2540bb
+
+
 ---
 
 ## Structure du Dépôt
