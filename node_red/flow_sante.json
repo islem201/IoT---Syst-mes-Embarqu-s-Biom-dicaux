@@ -1,471 +1,1073 @@
 [
-    {
-        "id": "flux_sante_iot_v4",
-        "type": "tab",
-        "label": "Monitoring Santé V4",
-        "disabled": false,
-        "info": "Version isolée - Supervision MAX30102 + MPU6050 + Alarme"
+  {
+    "id": "flux_sante_iot_01",
+    "type": "tab",
+    "label": "Monitoring Santé & Alarme",
+    "disabled": false,
+    "info": "Supervision MAX30102 + MPU6050, alarme ESP32, seuils réglables, enregistrement CSV."
+  },
+  {
+    "id": "ui_base_sante",
+    "type": "ui-base",
+    "name": "Supervision Patient IoT",
+    "path": "/dashboard",
+    "appIcon": "",
+    "includeClientData": true,
+    "acceptsClientConfig": [
+      "ui-notification",
+      "ui-control"
+    ],
+    "showPathInSidebar": false,
+    "headerContent": "page",
+    "navigationStyle": "none",
+    "titleBarStyle": "default",
+    "showReconnectNotification": true,
+    "notificationDisplayTime": 1,
+    "showDisconnectNotification": true,
+    "allowInstall": true
+  },
+  {
+    "id": "ui_theme_sante",
+    "type": "ui-theme",
+    "name": "Thème Santé",
+    "colors": {
+      "surface": "#ffffff",
+      "primary": "#0e7490",
+      "bgPage": "#f1f5f9",
+      "groupBg": "#ffffff",
+      "groupOutline": "#e2e8f0"
     },
-    {
-        "id": "ui_base_sante_v4",
-        "type": "ui-base",
-        "name": "Supervision IoT V4",
-        "path": "/dashboard_v4",
-        "includeClientData": true,
-        "acceptsClientConfig": [
-            "ui-notification",
-            "ui-control"
-        ],
-        "showPathInSidebar": false,
-        "headerContent": "page",
-        "navigationStyle": "default",
-        "titleBarStyle": "default",
-        "showReconnectNotification": true,
-        "notificationDisplayTime": 1,
-        "showDisconnectNotification": true,
-        "allowInstall": false
-    },
-    {
-        "id": "ui_theme_sante_v4",
-        "type": "ui-theme",
-        "name": "Thème Santé V4",
-        "colors": {
-            "surface": "#ffffff",
-            "primary": "#0094CE",
-            "bgPage": "#eeeeee",
-            "groupBg": "#ffffff",
-            "groupOutline": "#cccccc"
-        },
-        "sizes": {
-            "density": "default",
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
-    },
-    {
-        "id": "ui_page_sante_v4",
-        "type": "ui-page",
-        "name": "Diagnostic Final",
-        "ui": "ui_base_sante_v4",
-        "path": "/sante_final",
-        "icon": "heart-pulse",
-        "layout": "grid",
-        "theme": "ui_theme_sante_v4",
-        "breakpoints": [
-            { "name": "Default", "px": "0", "cols": "3" },
-            { "name": "Tablet", "px": "576", "cols": "6" },
-            { "name": "Small Desktop", "px": "768", "cols": "9" },
-            { "name": "Desktop", "px": "1024", "cols": "12" }
-        ],
-        "order": 1,
-        "visible": "true",
-        "disabled": "false"
-    },
-    {
-        "id": "grp_courbes_sante_v4",
-        "type": "ui-group",
-        "name": "Courbes Physiologiques & Mouvement V4",
-        "page": "ui_page_sante_v4",
-        "width": 8,
-        "height": 1,
-        "order": 1,
-        "showTitle": true,
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "grp_diagnostic_alarme_v4",
-        "type": "ui-group",
-        "name": "Diagnostic & Pilotage Alarme V4",
-        "page": "ui_page_sante_v4",
-        "width": 4,
-        "height": 1,
-        "order": 2,
-        "showTitle": true,
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "broker_rpi_v4",
-        "type": "mqtt-broker",
-        "name": "Broker Mosquitto RPi V4",
-        "broker": "172.18.32.42",
-        "port": 1883,
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": 4,
-        "keepalive": 60,
-        "cleansession": true,
-        "autoUnsubscribe": true
-    },
-    {
-        "id": "mqtt_in_bpm_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "BPM (MAX30102)",
-        "topic": "esp32/sante/bpm",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 150,
-        "y": 100,
-        "wires": [
-            [
-                "fn_prep_sante_chart_v4",
-                "fn_diagnostic_seuils_v4"
-            ]
-        ]
-    },
-    {
-        "id": "mqtt_in_spo2_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "SpO2 (MAX30102)",
-        "topic": "esp32/sante/spo2",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 150,
-        "y": 160,
-        "wires": [
-            [
-                "fn_prep_sante_chart_v4",
-                "fn_diagnostic_seuils_v4"
-            ]
-        ]
-    },
-    {
-        "id": "mqtt_in_accel_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "Accéléromètre (MPU6050)",
-        "topic": "esp32/mpu6050/accel",
-        "qos": "1",
-        "datatype": "json",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 170,
-        "y": 240,
-        "wires": [
-            [
-                "fn_calcul_norme_accel_v4"
-            ]
-        ]
-    },
-    {
-        "id": "mqtt_in_erreur_hw_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "Diagnostic Matériel Slave",
-        "topic": "esp32/diagnostic/erreur",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 170,
-        "y": 320,
-        "wires": [
-            [
-                "fn_diagnostic_seuils_v4"
-            ]
-        ]
-    },
-    {
-        "id": "fn_prep_sante_chart_v4",
-        "type": "function",
-        "z": "flux_sante_iot_v4",
-        "name": "Formatage Courbe Santé",
-        "func": "let val = Number(msg.payload);\nif (isNaN(val) || val <= 0) {\n    return null;\n}\nif (msg.topic.includes(\"bpm\")) {\n    msg.topic = \"Rythme Cardiaque (BPM)\";\n} else if (msg.topic.includes(\"spo2\")) {\n    msg.topic = \"Saturation SpO2 (%)\";\n}\nmsg.payload = val;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 450,
-        "y": 120,
-        "wires": [
-            [
-                "chart_sante_bpm_spo2_v4"
-            ]
-        ]
-    },
-    {
-        "id": "fn_calcul_norme_accel_v4",
-        "type": "function",
-        "z": "flux_sante_iot_v4",
-        "name": "Norme Accélération (m/s²)",
-        "func": "let d = msg.payload;\nif (typeof d === \"string\") {\n    try { d = JSON.parse(d); } catch(e) { return null; }\n}\nif (d && typeof d.x === \"number\" && typeof d.y === \"number\" && typeof d.z === \"number\") {\n    let norme = Math.sqrt(d.x * d.x + d.y * d.y + d.z * d.z);\n    norme = Math.round(norme * 100) / 100;\n    return {\n        topic: \"Accélération Totale (m/s²)\",\n        payload: norme\n    };\n}\nreturn null;",
-        "outputs": 1,
-        "noerr": 0,
-        "x": 450,
-        "y": 240,
-        "wires": [
-            [
-                "chart_accel_mpu_v4",
-                "fn_diagnostic_seuils_v4"
-            ]
-        ]
-    },
-    {
-        "id": "chart_sante_bpm_spo2_v4",
-        "type": "ui-chart",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_courbes_sante_v4",
-        "name": "Évolution BPM & SpO2",
-        "label": "Constantes Vitales (MAX30102)",
-        "order": 1,
-        "chartType": "line",
-        "category": "topic",
-        "categoryType": "msg",
-        "xAxisPropertyType": "timestamp",
-        "xAxisType": "time",
-        "yAxisProperty": "payload",
-        "yAxisPropertyType": "msg",
-        "ymin": "40",
-        "ymax": "160",
-        "action": "append",
-        "pointShape": "circle",
-        "pointRadius": 3,
-        "showLegend": true,
-        "removeOlder": "5",
-        "removeOlderUnit": "60",
-        "colors": [
-            "#e53935",
-            "#1e88e5"
-        ],
-        "width": 8,
-        "height": 6,
-        "interpolation": "linear",
-        "x": 740,
-        "y": 120,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "chart_accel_mpu_v4",
-        "type": "ui-chart",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_courbes_sante_v4",
-        "name": "Évolution Accélération",
-        "label": "Activité / Détection Chute (MPU6050)",
-        "order": 2,
-        "chartType": "line",
-        "category": "topic",
-        "categoryType": "msg",
-        "xAxisPropertyType": "timestamp",
-        "xAxisType": "time",
-        "yAxisProperty": "payload",
-        "yAxisPropertyType": "msg",
-        "ymin": "0",
-        "ymax": "25",
-        "action": "append",
-        "pointShape": "circle",
-        "pointRadius": 3,
-        "showLegend": true,
-        "removeOlder": "5",
-        "removeOlderUnit": "60",
-        "colors": [
-            "#fb8c00"
-        ],
-        "width": 8,
-        "height": 6,
-        "interpolation": "linear",
-        "x": 740,
-        "y": 200,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "fn_diagnostic_seuils_v4",
-        "type": "function",
-        "z": "flux_sante_iot_v4",
-        "name": "Diagnostic Seuils & Déclenchement Alarme",
-        "func": "let etat = context.get(\"etat\") || {\n    bpm: -1,\n    spo2: -1,\n    accel: 9.81,\n    errHw: 0\n};\n\nlet val = Number(msg.payload);\n\nif (msg.topic === \"esp32/sante/bpm\") etat.bpm = val;\nelse if (msg.topic === \"esp32/sante/spo2\") etat.spo2 = val;\nelse if (msg.topic === \"Accélération Totale (m/s²)\") etat.accel = val;\nelse if (msg.topic === \"esp32/diagnostic/erreur\") etat.errHw = val;\n\ncontext.set(\"etat\", etat);\n\nlet alertes = [];\n\nif (etat.bpm > 0 && (etat.bpm < 45 || etat.bpm > 120)) {\n    alertes.push(\"BPM critique : \" + etat.bpm + \" bpm\");\n}\nif (etat.spo2 > 0 && etat.spo2 < 92) {\n    alertes.push(\"SpO2 basse : \" + etat.spo2 + \" %\");\n}\nif (etat.accel > 18.0) {\n    alertes.push(\"Choc / Chute détectée (\" + etat.accel + \" m/s²)\");\n} else if (etat.accel < 3.5) {\n    alertes.push(\"Chute libre détectée (\" + etat.accel + \" m/s²)\");\n}\nif (etat.errHw !== 0) {\n    alertes.push(\"Anomalie système (Code \" + etat.errHw + \")\");\n}\n\nlet msgCmdAlarme = null;\nlet msgDashboard = {};\n\nif (alertes.length > 0) {\n    msgCmdAlarme = { topic: \"esp32/alarme/commande\", payload: \"ON\" };\n    msgDashboard.payload = \"🚨 ALERTE : \" + alertes.join(\" | \");\n} else {\n    msgDashboard.payload = \"✅ PARAMÈTRES NORMAUX (BPM: \" + (etat.bpm > 0 ? etat.bpm : \"--\") + \", SpO2: \" + (etat.spo2 > 0 ? etat.spo2 + \"%\" : \"--\") + \", Accel: \" + etat.accel + \" m/s²)\";\n}\n\nreturn [msgCmdAlarme, msgDashboard];",
-        "outputs": 2,
-        "noerr": 0,
-        "x": 500,
-        "y": 320,
-        "wires": [
-            [
-                "mqtt_out_alarme_cmd_v4",
-                "debug_alarme_v4"
-            ],
-            [
-                "ui_text_diagnostic_v4"
-            ]
-        ]
-    },
-    {
-        "id": "mqtt_out_alarme_cmd_v4",
-        "type": "mqtt out",
-        "z": "flux_sante_iot_v4",
-        "name": "Publier esp32/alarme/commande",
-        "topic": "",
-        "qos": "1",
-        "retain": "false",
-        "broker": "broker_rpi_v4",
-        "x": 850,
-        "y": 290,
-        "wires": []
-    },
-    {
-        "id": "debug_alarme_v4",
-        "type": "debug",
-        "z": "flux_sante_iot_v4",
-        "name": "Log Envoi Alarme V4",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "x": 810,
-        "y": 250,
-        "wires": []
-    },
-    {
-        "id": "ui_text_diagnostic_v4",
-        "type": "ui-text",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_diagnostic_alarme_v4",
-        "order": 1,
-        "width": 4,
-        "height": 2,
-        "name": "État Diagnostic V4",
-        "label": "Diagnostic en cours :",
-        "format": "{{msg.payload}}",
-        "layout": "col-center",
-        "x": 800,
-        "y": 350,
-        "wires": []
-    },
-    {
-        "id": "mqtt_in_etat_alarme_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "État Sirène (ACTIVE/ACQUITTEE)",
-        "topic": "esp32/alarme/etat",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 180,
-        "y": 420,
-        "wires": [
-            [
-                "ui_text_etat_buzzer_v4"
-            ]
-        ]
-    },
-    {
-        "id": "ui_text_etat_buzzer_v4",
-        "type": "ui-text",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_diagnostic_alarme_v4",
-        "order": 2,
-        "width": 4,
-        "height": 1,
-        "name": "État Sirène V4",
-        "label": "État Boîtier Alarme :",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "x": 490,
-        "y": 420,
-        "wires": []
-    },
-    {
-        "id": "mqtt_in_btn_cmd_v4",
-        "type": "mqtt in",
-        "z": "flux_sante_iot_v4",
-        "name": "Bouton Physique (command = on/off)",
-        "topic": "esp32/alarme/command",
-        "qos": "1",
-        "datatype": "auto-detect",
-        "broker": "broker_rpi_v4",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 190,
-        "y": 480,
-        "wires": [
-            [
-                "ui_text_btn_physique_v4"
-            ]
-        ]
-    },
-    {
-        "id": "ui_text_btn_physique_v4",
-        "type": "ui-text",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_diagnostic_alarme_v4",
-        "order": 3,
-        "width": 4,
-        "height": 1,
-        "name": "État Bouton Physique V4",
-        "label": "Bouton Acquittement (command) :",
-        "format": "{{msg.payload}}",
-        "layout": "row-spread",
-        "x": 510,
-        "y": 480,
-        "wires": []
-    },
-    {
-        "id": "ui_btn_test_alarme_v4",
-        "type": "ui-button",
-        "z": "flux_sante_iot_v4",
-        "group": "grp_diagnostic_alarme_v4",
-        "name": "Bouton Test Alarme V4",
-        "label": "Tester l'Alarme (ON)",
-        "order": 4,
-        "width": 4,
-        "height": 1,
-        "tooltip": "Envoie ON à l'ESP32 Pilotage",
-        "color": "#ffffff",
-        "bgcolor": "#d32f2f",
-        "icon": "bell-ring",
-        "iconPosition": "left",
-        "payload": "ON",
-        "payloadType": "str",
-        "topic": "esp32/alarme/commande",
-        "topicType": "str",
-        "enableClick": true,
-        "x": 480,
-        "y": 540,
-        "wires": [
-            [
-                "mqtt_out_alarme_cmd_v4",
-                "debug_alarme_v4"
-            ]
-        ]
-    },
-    {
-        "id": "global_cfg_sante_v4",
-        "type": "global-config",
-        "env": [],
-        "modules": {
-            "@flowfuse/node-red-dashboard": "1.28.0"
-        }
+    "sizes": {
+      "density": "default",
+      "pagePadding": "14px",
+      "groupGap": "14px",
+      "groupBorderRadius": "14px",
+      "widgetGap": "14px"
     }
+  },
+  {
+    "id": "ui_page_sante",
+    "type": "ui-page",
+    "name": "Supervision Santé",
+    "ui": "ui_base_sante",
+    "path": "/sante",
+    "icon": "heart-pulse",
+    "layout": "grid",
+    "theme": "ui_theme_sante",
+    "breakpoints": [
+      {
+        "name": "Default",
+        "px": "0",
+        "cols": "3"
+      },
+      {
+        "name": "Tablet",
+        "px": "576",
+        "cols": "6"
+      },
+      {
+        "name": "Small Desktop",
+        "px": "768",
+        "cols": "9"
+      },
+      {
+        "name": "Desktop",
+        "px": "1024",
+        "cols": "12"
+      }
+    ],
+    "order": 1,
+    "className": "",
+    "visible": "true",
+    "disabled": "false"
+  },
+  {
+    "id": "grp_kpi",
+    "type": "ui-group",
+    "name": "Vue d'ensemble",
+    "page": "ui_page_sante",
+    "width": "12",
+    "height": "1",
+    "order": 1,
+    "showTitle": false,
+    "className": "",
+    "visible": "true",
+    "disabled": "false",
+    "groupType": "default"
+  },
+  {
+    "id": "grp_courbes",
+    "type": "ui-group",
+    "name": "Courbes en direct",
+    "page": "ui_page_sante",
+    "width": "12",
+    "height": "1",
+    "order": 2,
+    "showTitle": true,
+    "className": "",
+    "visible": "true",
+    "disabled": "false",
+    "groupType": "default"
+  },
+  {
+    "id": "grp_seuils",
+    "type": "ui-group",
+    "name": "Seuils d'alarme",
+    "page": "ui_page_sante",
+    "width": "8",
+    "height": "1",
+    "order": 3,
+    "showTitle": true,
+    "className": "",
+    "visible": "true",
+    "disabled": "false",
+    "groupType": "default"
+  },
+  {
+    "id": "grp_controle",
+    "type": "ui-group",
+    "name": "Commandes et enregistrement",
+    "page": "ui_page_sante",
+    "width": "4",
+    "height": "1",
+    "order": 4,
+    "showTitle": true,
+    "className": "",
+    "visible": "true",
+    "disabled": "false",
+    "groupType": "default"
+  },
+  {
+    "id": "broker_rpi_172",
+    "type": "mqtt-broker",
+    "name": "Broker Mosquitto RPi",
+    "broker": "172.18.32.42",
+    "port": 1883,
+    "clientid": "",
+    "autoConnect": true,
+    "usetls": false,
+    "protocolVersion": 4,
+    "keepalive": 60,
+    "cleansession": true,
+    "autoUnsubscribe": true
+  },
+  {
+    "id": "c_in",
+    "type": "comment",
+    "z": "flux_sante_iot_01",
+    "name": "1. Entrées MQTT (capteurs et bouton)",
+    "info": "",
+    "x": 200,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "mqtt_in_bpm",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "BPM (MAX30102)",
+    "topic": "esp32/sante/bpm",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 90,
+    "wires": [
+      [
+        "fn_ingest"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_spo2",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "SpO2 (MAX30102)",
+    "topic": "esp32/sante/spo2",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 140,
+    "wires": [
+      [
+        "fn_ingest"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_accel",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "Accéléromètre (MPU6050)",
+    "topic": "esp32/mpu6050/accel",
+    "qos": "1",
+    "datatype": "json",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 190,
+    "wires": [
+      [
+        "fn_ingest"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_erreur",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "Diagnostic matériel Slave",
+    "topic": "esp32/diagnostic/erreur",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 240,
+    "wires": [
+      [
+        "fn_ingest"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_etat",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "État du boîtier d'alarme",
+    "topic": "esp32/alarme/etat",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 320,
+    "wires": [
+      [
+        "fn_button"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_in_bouton",
+    "type": "mqtt in",
+    "z": "flux_sante_iot_01",
+    "name": "Bouton physique (SIMPLE / DOUBLE)",
+    "topic": "esp32/alarme/bouton",
+    "qos": "1",
+    "datatype": "auto-detect",
+    "broker": "broker_rpi_172",
+    "nl": false,
+    "rap": true,
+    "rh": 0,
+    "inputs": 0,
+    "x": 170,
+    "y": 370,
+    "wires": [
+      [
+        "fn_button"
+      ]
+    ]
+  },
+  {
+    "id": "fn_ingest",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Ingestion capteurs",
+    "func": "// Reçoit les 4 topics capteurs, met à jour l'état et alimente les courbes.\nconst e = flow.get(\"etat\");\nif (!e) return null;                       // flow pas encore initialisé\nconst t = msg.topic;\nconst out = [null, null, null, null];      // [courbe BPM, courbe SpO2, courbe accel, moteur]\nconst n = Number(msg.payload);\n\nif (t === \"esp32/sante/bpm\") {\n    e.bpm = isFinite(n) ? n : -1;\n    if (e.bpm > 0) out[0] = { topic: \"BPM\", payload: e.bpm };            // -1 = pas de doigt\n} else if (t === \"esp32/sante/spo2\") {\n    e.spo2 = isFinite(n) ? n : -1;\n    if (e.spo2 > 0) out[1] = { topic: \"SpO2 (%)\", payload: e.spo2 };\n} else if (t === \"esp32/mpu6050/accel\") {\n    let d = msg.payload;\n    if (typeof d === \"string\") { try { d = JSON.parse(d); } catch (err) { d = null; } }\n    if (!d || ![d.x, d.y, d.z].every(v => typeof v === \"number\" && isFinite(v))) return null;\n    e.ax = d.x; e.ay = d.y; e.az = d.z;\n    e.accel = Math.round(Math.sqrt(d.x * d.x + d.y * d.y + d.z * d.z) * 100) / 100;   // repos ~ 9.81\n    out[2] = { topic: \"Accélération (m/s²)\", payload: e.accel };\n} else if (t === \"esp32/diagnostic/erreur\") {\n    const raw = String(msg.payload).trim();\n    e.errHw = (raw === \"\" || raw === \"0\" || /^ok$/i.test(raw)) ? 0 : raw;\n} else {\n    return null;\n}\n\ne.lastRx = Date.now();\nflow.set(\"etat\", e);\nout[3] = { topic: \"eval\" };\nreturn out;\n",
+    "outputs": 4,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 470,
+    "y": 160,
+    "wires": [
+      [
+        "chart_bpm"
+      ],
+      [
+        "chart_spo2"
+      ],
+      [
+        "chart_accel"
+      ],
+      [
+        "fn_engine"
+      ]
+    ]
+  },
+  {
+    "id": "fn_button",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Bouton : SIMPLE = silence, DOUBLE = REC",
+    "func": "// Deux topics arrivent ici :\n//  - esp32/alarme/etat   : état du boîtier (VEILLE / ACTIVE / ACQUITTEE / HORS_LIGNE)\n//  - esp32/alarme/bouton : événements du bouton physique, détectés par l'ESP32\n//        SIMPLE = 1er appui  -> coupe l'alarme\n//        DOUBLE = 2e appui rapide -> démarre / arrête l'enregistrement\nconst e = flow.get(\"etat\");\nif (!e) return null;\nconst raw = (typeof msg.payload === \"object\") ? JSON.stringify(msg.payload) : String(msg.payload);\nconst val = raw.replace(/[\"\\s]/g, \"\").toUpperCase();\n\nif (msg.topic === \"esp32/alarme/bouton\") {\n    if (msg.retain) return null;                 // jamais d'action sur un message retenu\n    if (val === \"SIMPLE\") return [{ topic: \"silence\" }, null];\n    if (val === \"DOUBLE\") return [null, { topic: \"toggle\" }];\n    return null;\n}\ne.buzzer = val.length > 24 ? val.slice(0, 24) + \"…\" : val;\nflow.set(\"etat\", e);\nreturn [{ topic: \"eval\" }, null];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 520,
+    "y": 320,
+    "wires": [
+      [
+        "fn_engine"
+      ],
+      [
+        "fn_recorder"
+      ]
+    ]
+  },
+  {
+    "id": "c_core",
+    "type": "comment",
+    "z": "flux_sante_iot_01",
+    "name": "2. Moteur d'alarme, seuils, enregistrement",
+    "info": "",
+    "x": 760,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "inj_tick",
+    "type": "inject",
+    "z": "flux_sante_iot_01",
+    "name": "Tick 1 s",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "1",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "2",
+    "topic": "tick",
+    "payload": "",
+    "payloadType": "date",
+    "x": 790,
+    "y": 100,
+    "wires": [
+      [
+        "fn_engine",
+        "fn_recorder"
+      ]
+    ]
+  },
+  {
+    "id": "fn_engine",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Moteur : seuils et alarme",
+    "func": "// MOTEUR : évalue les seuils, gère l'alarme (ON/OFF, silence, test) et construit l'état du dashboard.\nconst now = Date.now();\nconst e = flow.get(\"etat\"), s = flow.get(\"seuils\"), c = flow.get(\"ctrl\"), rec = flow.get(\"rec\");\nif (!e || !s || !c || !rec) return null;\nconst t = msg.topic;\n\n// ---------- 1) Détection des anomalies ----------\nconst alerts = [];\nconst boxOff = (e.buzzer === \"HORS_LIGNE\");\nconst fl = { bpm: \"none\", spo2: \"none\", accel: \"none\", err: (e.errHw || boxOff) ? \"bad\" : \"ok\" };\n\nif (e.bpm > 0) {\n    fl.bpm = \"ok\";\n    if (e.bpm < s.bpmMin)      { fl.bpm = \"bad\"; alerts.push(\"Rythme cardiaque trop bas : \" + e.bpm + \" bpm\"); }\n    else if (e.bpm > s.bpmMax) { fl.bpm = \"bad\"; alerts.push(\"Rythme cardiaque trop élevé : \" + e.bpm + \" bpm\"); }\n}\nif (e.spo2 > 0) {\n    fl.spo2 = \"ok\";\n    if (e.spo2 < s.spo2Min)    { fl.spo2 = \"bad\"; alerts.push(\"SpO2 basse : \" + e.spo2 + \" %\"); }\n}\nif (e.accel !== null) {\n    fl.accel = \"ok\";\n    if (e.accel > s.accelMax)      { fl.accel = \"bad\"; alerts.push(\"Choc ou chute détecté : \" + e.accel + \" m/s²\"); }\n    else if (e.accel < s.accelMin) { fl.accel = \"bad\"; alerts.push(\"Chute libre détectée : \" + e.accel + \" m/s²\"); }\n}\nif (e.errHw) alerts.push(\"Anomalie matérielle (code \" + e.errHw + \")\");\nif (boxOff) alerts.push(\"Boîtier d'alarme hors ligne\");\n\nconst ageS = Math.round((now - e.lastRx) / 1000);\nconst online = ageS <= s.timeout;\nif (!online) alerts.push(\"Aucune donnée reçue depuis \" + ageS + \" s\");\n\nconst real = alerts.length > 0;\n\n// ---------- 2) Actions utilisateur ----------\nif (t === \"silence\" && c.alarmOn) {\n    if (real) c.silencedUntil = now + s.snooze * 1000;   // silence temporaire : réarmement après \"snooze\" s\n    c.testUntil = 0;\n}\nif (t === \"test\") c.testUntil = now + 5000;\n\nconst test = now < c.testUntil;\nif (!real && !test) c.silencedUntil = 0;                 // retour à la normale : on réarme\nconst silenced = real && now < c.silencedUntil;\nconst alarmOn = (real && !silenced) || test;\n\n// ---------- 3) Commande vers l'ESP32 Pilotage (uniquement sur changement + rappel toutes les 30 s) ----------\nlet cmd = null;\nif (alarmOn !== c.alarmOn || (alarmOn && now - c.lastCmdAt > 30000)) {\n    cmd = { payload: alarmOn ? \"ON\" : \"OFF\" };\n    c.lastCmdAt = now;\n}\n\n// ---------- 4) Notification dashboard ----------\nlet notif = null;\nif (real && !c.hadReal) notif = { payload: \"🚨 ALERTE : \" + alerts.join(\" | \"), color: \"#dc2626\" };\nelse if (!real && c.hadReal) notif = { payload: \"✅ Retour à la normale\", color: \"#16a34a\" };\nc.hadReal = real;\nc.alarmOn = alarmOn;\n\nflow.set(\"ctrl\", c);\nflow.set(\"last\", { alarmOn: alarmOn, silenced: silenced, alerts: alerts });\n\n// ---------- 5) État complet envoyé au dashboard ----------\nconst ui = {\n    status: alarmOn ? \"alarm\" : (silenced ? \"silenced\" : (e.lastRx ? \"normal\" : \"wait\")),\n    alerts: alerts, flags: fl, online: online, ageS: ageS,\n    bpm: e.bpm > 0 ? e.bpm : null,\n    spo2: e.spo2 > 0 ? e.spo2 : null,\n    accel: e.accel, ax: e.ax, ay: e.ay, az: e.az,\n    err: e.errHw, buzzer: e.buzzer,\n    alarmOn: alarmOn, silenced: silenced,\n    silenceLeft: silenced ? Math.ceil((c.silencedUntil - now) / 1000) : 0,\n    test: test, seuils: s,\n    rec: { on: rec.on, file: rec.file, rows: rec.rows, startedAt: rec.startedAt }\n};\n\nnode.status(alarmOn ? { fill: \"red\", shape: \"dot\", text: \"ALARME\" } :\n            silenced ? { fill: \"yellow\", shape: \"ring\", text: \"silence\" } :\n                       { fill: \"green\", shape: \"dot\", text: \"normal\" });\n\nreturn [cmd, { topic: \"state\", payload: ui }, notif];\n",
+    "outputs": 3,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 800,
+    "y": 240,
+    "wires": [
+      [
+        "mqtt_out_alarme"
+      ],
+      [
+        "tpl_kpi",
+        "tpl_ctrl"
+      ],
+      [
+        "ui_notify"
+      ]
+    ]
+  },
+  {
+    "id": "fn_recorder",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Enregistrement CSV (1 ligne / min)",
+    "func": "// ENREGISTREMENT CSV : 1 ligne par minute tant que l'enregistrement est actif.\nconst rec = flow.get(\"rec\");\nif (!rec) return null;\nconst dir = flow.get(\"dir\");\nconst HEADER = \"horodatage;bpm;spo2;accel_x;accel_y;accel_z;accel_norme_ms2;etat_alarme;alertes;code_erreur_materiel\";\nconst stamp = (d) => d.toLocaleString(\"sv-SE\");        // 2026-11-24 14:03:05 (heure locale)\nconst num = (x) => (typeof x === \"number\" && isFinite(x)) ? String(Math.round(x * 100) / 100) : \"\";\n\nfunction row() {\n    const e = flow.get(\"etat\") || {};\n    const l = flow.get(\"last\") || {};\n    const etat = l.alarmOn ? \"ALARME\" : (l.silenced ? \"SILENCE\" : \"NORMAL\");\n    return [\n        stamp(new Date()),\n        e.bpm > 0 ? e.bpm : \"\",\n        e.spo2 > 0 ? e.spo2 : \"\",\n        num(e.ax), num(e.ay), num(e.az), num(e.accel),\n        etat,\n        (l.alerts || []).join(\" | \").replace(/;/g, \",\"),\n        String(e.errHw || 0).replace(/;/g, \",\")\n    ].join(\";\");\n}\n\nif (msg.topic === \"toggle\" || msg.topic === \"toggle_rec\") {\n    if (!rec.on) {                                      // ---- DÉMARRAGE\n        const now = new Date();\n        const f = stamp(now).replace(\" \", \"_\").replace(/:/g, \"-\");\n        const r = { on: true, file: dir + \"/mesures_\" + f + \".csv\", rows: 1, startedAt: stamp(now), lastWrite: Date.now() };\n        flow.set(\"rec\", r);\n        return [\n            { filename: r.file, payload: HEADER + \"\\n\" + row() },\n            { topic: \"eval\" },\n            { payload: \"⏺ Enregistrement démarré (1 mesure par minute)\", color: \"#16a34a\" }\n        ];\n    }\n    const line = row();                                 // ---- ARRÊT\n    rec.on = false;\n    rec.rows += 1;\n    flow.set(\"rec\", rec);\n    return [\n        { filename: rec.file, payload: line },\n        { topic: \"eval\" },\n        { payload: \"⏹ Enregistrement terminé : \" + rec.rows + \" lignes\", color: \"#475569\" }\n    ];\n}\n\nif (msg.topic === \"tick\" && rec.on && Date.now() - rec.lastWrite >= 60000) {\n    rec.lastWrite = Date.now();\n    rec.rows += 1;\n    flow.set(\"rec\", rec);\n    return [{ filename: rec.file, payload: row() }, null, null];\n}\nreturn null;\n",
+    "outputs": 3,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 820,
+    "y": 400,
+    "wires": [
+      [
+        "file_csv"
+      ],
+      [
+        "fn_engine"
+      ],
+      [
+        "ui_notify"
+      ]
+    ]
+  },
+  {
+    "id": "mqtt_out_alarme",
+    "type": "mqtt out",
+    "z": "flux_sante_iot_01",
+    "name": "Ordre alarme vers ESP32 Pilotage",
+    "topic": "esp32/alarme/commande",
+    "qos": "1",
+    "retain": "false",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "broker_rpi_172",
+    "x": 1130,
+    "y": 200,
+    "wires": []
+  },
+  {
+    "id": "file_csv",
+    "type": "file",
+    "z": "flux_sante_iot_01",
+    "name": "Fichier mesures CSV",
+    "filename": "filename",
+    "filenameType": "msg",
+    "appendNewline": true,
+    "createDir": true,
+    "overwriteFile": "false",
+    "encoding": "none",
+    "x": 1130,
+    "y": 400,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "ui_notify",
+    "type": "ui-notification",
+    "z": "flux_sante_iot_01",
+    "ui": "ui_base_sante",
+    "position": "top right",
+    "displayTime": "8",
+    "highlight": "",
+    "sendall": true,
+    "outputs": 0,
+    "ackRequired": false,
+    "allowDismiss": true,
+    "raw": false,
+    "className": "",
+    "name": "Notifications",
+    "x": 1130,
+    "y": 320,
+    "wires": []
+  },
+  {
+    "id": "inj_init",
+    "type": "inject",
+    "z": "flux_sante_iot_01",
+    "name": "Démarrage",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "1",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 170,
+    "y": 460,
+    "wires": [
+      [
+        "fn_init"
+      ]
+    ]
+  },
+  {
+    "id": "fn_init",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Initialisation",
+    "func": "// Exécuté au démarrage : initialise toute la mémoire du flow.\nconst DIR = env.get(\"SANTE_DIR\") || \"/home/pi/sante\";   // <-- dossier des fichiers (modifiable)\nconst DEFAULTS = { bpmMin: 45, bpmMax: 120, spo2Min: 92, accelMax: 18, accelMin: 3.5, snooze: 120, timeout: 30 };\n\nflow.set(\"dir\", DIR);\nflow.set(\"seuilsDefaults\", DEFAULTS);\nflow.set(\"seuils\", Object.assign({}, DEFAULTS));\nflow.set(\"etat\", { bpm: -1, spo2: -1, ax: null, ay: null, az: null, accel: null, errHw: 0, buzzer: \"--\", lastRx: Date.now() });\nflow.set(\"ctrl\", { alarmOn: false, silencedUntil: 0, testUntil: 0, lastCmdAt: 0, hadReal: false });\nflow.set(\"rec\", { on: false, file: \"\", rows: 0, startedAt: \"\", lastWrite: 0 });\nflow.set(\"last\", { alarmOn: false, silenced: false, alerts: [] });\n\nnode.status({ fill: \"green\", shape: \"dot\", text: DIR });\n// On demande ensuite la lecture des seuils sauvegardés\nreturn { topic: \"load\", filename: DIR + \"/seuils.json\" };\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 360,
+    "y": 460,
+    "wires": [
+      [
+        "file_in_seuils"
+      ]
+    ]
+  },
+  {
+    "id": "file_in_seuils",
+    "type": "file in",
+    "z": "flux_sante_iot_01",
+    "name": "Lire seuils.json",
+    "filename": "filename",
+    "filenameType": "msg",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "none",
+    "allProps": false,
+    "x": 540,
+    "y": 460,
+    "wires": [
+      [
+        "fn_seuils"
+      ]
+    ]
+  },
+  {
+    "id": "catch_seuils",
+    "type": "catch",
+    "z": "flux_sante_iot_01",
+    "name": "Pas de fichier seuils (normal au 1er lancement)",
+    "scope": [
+      "file_in_seuils"
+    ],
+    "uncaught": false,
+    "x": 640,
+    "y": 510,
+    "wires": []
+  },
+  {
+    "id": "fn_seuils",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Gestion des seuils",
+    "func": "// Gestion des seuils : get / set / reset / load (lecture du fichier au démarrage)\nconst D = flow.get(\"seuilsDefaults\");\nif (!D) return null;\nconst cur = flow.get(\"seuils\") || D;\n\nconst RANGES = {\n    bpmMin:   [20, 100, \"BPM minimum\"],\n    bpmMax:   [80, 250, \"BPM maximum\"],\n    spo2Min:  [70, 100, \"SpO2 minimum\"],\n    accelMax: [10, 80,  \"Seuil de choc\"],\n    accelMin: [0, 9,    \"Seuil de chute libre\"],\n    snooze:   [5, 3600, \"Durée du silence\"],\n    timeout:  [5, 600,  \"Délai de perte de communication\"]\n};\nfunction validate(p) {\n    const out = {};\n    for (const k in RANGES) {\n        const [lo, hi, label] = RANGES[k];\n        const v = Number(p[k]);\n        if (p[k] === \"\" || p[k] === null || p[k] === undefined || !isFinite(v) || v < lo || v > hi)\n            return { error: label + \" : entrer une valeur entre \" + lo + \" et \" + hi };\n        out[k] = v;\n    }\n    if (out.bpmMin >= out.bpmMax) return { error: \"Le BPM minimum doit être inférieur au BPM maximum\" };\n    if (out.accelMin >= out.accelMax) return { error: \"Le seuil de chute libre doit être inférieur au seuil de choc\" };\n    return { values: out };\n}\nconst reply = (ok, message, values) => ({ topic: \"seuils\", payload: { ok: ok, message: message, values: values } });\nconst fileMsg = (v) => ({ filename: flow.get(\"dir\") + \"/seuils.json\", payload: JSON.stringify(v, null, 2) });\n\nswitch (msg.topic) {\n    case \"get\":\n        return [reply(true, \"\", cur), null, null];\n    case \"load\":\n        try {\n            const r = validate(Object.assign({}, D, JSON.parse(msg.payload)));\n            if (r.values) { flow.set(\"seuils\", r.values); node.status({ fill: \"green\", shape: \"dot\", text: \"seuils chargés\" }); }\n        } catch (err) {\n            node.status({ fill: \"yellow\", shape: \"ring\", text: \"fichier seuils illisible\" });\n        }\n        return [null, null, { topic: \"eval\" }];\n    case \"reset\":\n        flow.set(\"seuils\", Object.assign({}, D));\n        return [reply(true, \"Valeurs par défaut restaurées\", D), fileMsg(D), { topic: \"eval\" }];\n    case \"set\": {\n        const r = validate(msg.payload || {});\n        if (r.error) return [reply(false, r.error, cur), null, null];\n        flow.set(\"seuils\", r.values);\n        return [reply(true, \"Seuils enregistrés\", r.values), fileMsg(r.values), { topic: \"eval\" }];\n    }\n}\nreturn null;\n",
+    "outputs": 3,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 760,
+    "y": 560,
+    "wires": [
+      [
+        "tpl_seuils"
+      ],
+      [
+        "file_seuils"
+      ],
+      [
+        "fn_engine"
+      ]
+    ]
+  },
+  {
+    "id": "file_seuils",
+    "type": "file",
+    "z": "flux_sante_iot_01",
+    "name": "Sauvegarde seuils.json",
+    "filename": "filename",
+    "filenameType": "msg",
+    "appendNewline": true,
+    "createDir": true,
+    "overwriteFile": "true",
+    "encoding": "none",
+    "x": 1100,
+    "y": 580,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "catch_files",
+    "type": "catch",
+    "z": "flux_sante_iot_01",
+    "name": "Erreurs fichiers",
+    "scope": [
+      "file_csv",
+      "file_seuils"
+    ],
+    "uncaught": false,
+    "x": 170,
+    "y": 640,
+    "wires": [
+      [
+        "fn_err_fmt"
+      ]
+    ]
+  },
+  {
+    "id": "fn_err_fmt",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Message d'erreur",
+    "func": "const m = (msg.error && msg.error.message) ? msg.error.message : \"erreur inconnue\";\nreturn { payload: \"⚠ Écriture du fichier impossible : \" + m, color: \"#b45309\" };\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 380,
+    "y": 640,
+    "wires": [
+      [
+        "ui_notify"
+      ]
+    ]
+  },
+  {
+    "id": "c_ui",
+    "type": "comment",
+    "z": "flux_sante_iot_01",
+    "name": "3. Dashboard",
+    "info": "",
+    "x": 1130,
+    "y": 40,
+    "wires": []
+  },
+  {
+    "id": "chart_bpm",
+    "type": "ui-chart",
+    "z": "flux_sante_iot_01",
+    "group": "grp_courbes",
+    "name": "Courbe BPM",
+    "label": "Rythme cardiaque (bpm)",
+    "order": 1,
+    "chartType": "line",
+    "category": "topic",
+    "categoryType": "msg",
+    "xAxisLabel": "",
+    "xAxisProperty": "",
+    "xAxisPropertyType": "timestamp",
+    "xAxisType": "time",
+    "xAxisFormat": "",
+    "xAxisFormatType": "auto",
+    "xmin": "",
+    "xmax": "",
+    "yAxisLabel": "",
+    "yAxisProperty": "payload",
+    "yAxisPropertyType": "msg",
+    "ymin": "40",
+    "ymax": "160",
+    "action": "append",
+    "stackSeries": false,
+    "pointShape": "false",
+    "pointRadius": 4,
+    "showLegend": false,
+    "bins": 10,
+    "removeOlder": 15,
+    "removeOlderUnit": "60",
+    "removeOlderPoints": "",
+    "colors": [
+      "#dc2626"
+    ],
+    "textColor": [
+      "#666666"
+    ],
+    "textColorDefault": true,
+    "gridColor": [
+      "#e5e5e5"
+    ],
+    "gridColorDefault": true,
+    "width": 6,
+    "height": 6,
+    "className": "",
+    "interpolation": "bezier",
+    "x": 760,
+    "y": 80,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "chart_spo2",
+    "type": "ui-chart",
+    "z": "flux_sante_iot_01",
+    "group": "grp_courbes",
+    "name": "Courbe SpO2",
+    "label": "Saturation en oxygène (%)",
+    "order": 2,
+    "chartType": "line",
+    "category": "topic",
+    "categoryType": "msg",
+    "xAxisLabel": "",
+    "xAxisProperty": "",
+    "xAxisPropertyType": "timestamp",
+    "xAxisType": "time",
+    "xAxisFormat": "",
+    "xAxisFormatType": "auto",
+    "xmin": "",
+    "xmax": "",
+    "yAxisLabel": "",
+    "yAxisProperty": "payload",
+    "yAxisPropertyType": "msg",
+    "ymin": "80",
+    "ymax": "100",
+    "action": "append",
+    "stackSeries": false,
+    "pointShape": "false",
+    "pointRadius": 4,
+    "showLegend": false,
+    "bins": 10,
+    "removeOlder": 15,
+    "removeOlderUnit": "60",
+    "removeOlderPoints": "",
+    "colors": [
+      "#0369a1"
+    ],
+    "textColor": [
+      "#666666"
+    ],
+    "textColorDefault": true,
+    "gridColor": [
+      "#e5e5e5"
+    ],
+    "gridColorDefault": true,
+    "width": 6,
+    "height": 6,
+    "className": "",
+    "interpolation": "bezier",
+    "x": 760,
+    "y": 120,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "chart_accel",
+    "type": "ui-chart",
+    "z": "flux_sante_iot_01",
+    "group": "grp_courbes",
+    "name": "Courbe accélération",
+    "label": "Activité et détection de chute (m/s²)",
+    "order": 3,
+    "chartType": "line",
+    "category": "topic",
+    "categoryType": "msg",
+    "xAxisLabel": "",
+    "xAxisProperty": "",
+    "xAxisPropertyType": "timestamp",
+    "xAxisType": "time",
+    "xAxisFormat": "",
+    "xAxisFormatType": "auto",
+    "xmin": "",
+    "xmax": "",
+    "yAxisLabel": "",
+    "yAxisProperty": "payload",
+    "yAxisPropertyType": "msg",
+    "ymin": "0",
+    "ymax": "25",
+    "action": "append",
+    "stackSeries": false,
+    "pointShape": "false",
+    "pointRadius": 4,
+    "showLegend": false,
+    "bins": 10,
+    "removeOlder": 15,
+    "removeOlderUnit": "60",
+    "removeOlderPoints": "",
+    "colors": [
+      "#d97706"
+    ],
+    "textColor": [
+      "#666666"
+    ],
+    "textColorDefault": true,
+    "gridColor": [
+      "#e5e5e5"
+    ],
+    "gridColorDefault": true,
+    "width": 12,
+    "height": 6,
+    "className": "",
+    "interpolation": "bezier",
+    "x": 760,
+    "y": 160,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "tpl_kpi",
+    "type": "ui-template",
+    "z": "flux_sante_iot_01",
+    "group": "grp_kpi",
+    "page": "",
+    "ui": "",
+    "name": "Vue d'ensemble",
+    "order": 1,
+    "width": 12,
+    "height": 0,
+    "head": "",
+    "format": "<template>\n  <div class=\"sk\">\n    <div class=\"sk-banner\" :class=\"'is-' + s.status\">\n      <v-icon class=\"sk-ico\" size=\"44\">{{ bannerIcon }}</v-icon>\n      <div class=\"sk-txt\">\n        <div class=\"sk-title\">{{ bannerTitle }}</div>\n        <div class=\"sk-sub\">{{ bannerSub }}</div>\n      </div>\n      <div class=\"sk-pill\" :class=\"s.online ? 'on' : 'off'\">\n        <span class=\"sk-dot\"></span>{{ s.online ? 'Capteurs en ligne' : 'Hors ligne depuis ' + s.ageS + ' s' }}\n      </div>\n    </div>\n\n    <div class=\"sk-panel\" :class=\"{ stale: !s.online }\">\n      <div class=\"sk-cell\" :class=\"'f-' + s.flags.bpm\">\n        <div class=\"sk-lbl\"><v-icon size=\"20\" :class=\"{ beat: s.bpm !== null }\">mdi-heart-pulse</v-icon>Rythme cardiaque</div>\n        <div class=\"sk-val\">{{ fmt(s.bpm, 0) }}<span class=\"sk-unit\">bpm</span></div>\n        <div class=\"sk-note\">{{ s.bpm === null ? 'Posez le doigt sur le capteur' : 'Plage normale de ' + s.seuils.bpmMin + ' à ' + s.seuils.bpmMax + ' bpm' }}</div>\n      </div>\n      <div class=\"sk-cell\" :class=\"'f-' + s.flags.spo2\">\n        <div class=\"sk-lbl\"><v-icon size=\"20\">mdi-water-percent</v-icon>Saturation en oxygène</div>\n        <div class=\"sk-val\">{{ fmt(s.spo2, 0) }}<span class=\"sk-unit\">%</span></div>\n        <div class=\"sk-note\">{{ s.spo2 === null ? 'Posez le doigt sur le capteur' : 'Minimum accepté : ' + s.seuils.spo2Min + ' %' }}</div>\n      </div>\n      <div class=\"sk-cell\" :class=\"'f-' + s.flags.accel\">\n        <div class=\"sk-lbl\"><v-icon size=\"20\">mdi-run-fast</v-icon>Accélération</div>\n        <div class=\"sk-val\">{{ fmt(s.accel, 2) }}<span class=\"sk-unit\">m/s²</span></div>\n        <div class=\"sk-note\">x {{ fmt(s.ax, 2) }}   y {{ fmt(s.ay, 2) }}   z {{ fmt(s.az, 2) }}</div>\n      </div>\n      <div class=\"sk-cell\" :class=\"'f-' + s.flags.err\">\n        <div class=\"sk-lbl\"><v-icon size=\"20\">mdi-bell-ring-outline</v-icon>Boîtier d'alarme</div>\n        <div class=\"sk-val sm\">{{ s.buzzer }}</div>\n        <div class=\"sk-note\">{{ s.buzzer === 'HORS_LIGNE' ? 'Boîtier injoignable' : (s.err ? 'Anomalie matérielle, code ' + s.err : 'Aucune anomalie matérielle') }}</div>\n      </div>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      s: {\n        status: 'wait', alerts: [], online: true, ageS: 0, silenceLeft: 0,\n        flags: { bpm: 'none', spo2: 'none', accel: 'none', err: 'ok' },\n        bpm: null, spo2: null, accel: null, ax: null, ay: null, az: null,\n        err: 0, buzzer: '--', seuils: {}, rec: {}\n      }\n    }\n  },\n  computed: {\n    bannerIcon() {\n      return { wait: 'mdi-timer-sand', normal: 'mdi-shield-check', silenced: 'mdi-bell-off', alarm: 'mdi-alert-octagon' }[this.s.status] || 'mdi-help-circle'\n    },\n    bannerTitle() {\n      return { wait: 'En attente des mesures', normal: 'Paramètres normaux', silenced: 'Alarme coupée', alarm: 'Alerte en cours' }[this.s.status] || ''\n    },\n    bannerSub() {\n      const s = this.s\n      if (s.status === 'alarm' || s.status === 'silenced') {\n        let t = s.alerts.length ? s.alerts.join('   |   ') : \"Test de l'alarme\"\n        if (s.status === 'silenced') t += '   (réarmement dans ' + s.silenceLeft + ' s)'\n        return t\n      }\n      if (s.status === 'normal') return 'Toutes les mesures sont dans les seuils définis'\n      return 'Connexion au broker MQTT en cours'\n    }\n  },\n  methods: {\n    fmt(v, d) { return (v === null || v === undefined || isNaN(v)) ? '--' : Number(v).toFixed(d) }\n  },\n  mounted() {\n    this.$socket.on('msg-input:' + this.id, (msg) => {\n      if (msg && msg.payload && typeof msg.payload === 'object') this.s = msg.payload\n    })\n  },\n  unmounted() {\n    this.$socket.off('msg-input:' + this.id)\n  }\n}\n</script>\n\n<style>\n.sk { display: flex; flex-direction: column; gap: 14px; }\n.sk-banner { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 14px; color: #fff; background: #64748b; transition: background .4s; }\n.sk-banner.is-normal { background: #0f766e; }\n.sk-banner.is-silenced { background: #b45309; }\n.sk-banner.is-alarm { background: #b91c1c; animation: sk-pulse 1.2s infinite; }\n@keyframes sk-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, .55); } 50% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); } }\n.sk-txt { flex: 1; min-width: 0; }\n.sk-title { font-size: 1.4rem; font-weight: 700; }\n.sk-sub { font-size: .95rem; opacity: .92; margin-top: 2px; overflow-wrap: anywhere; }\n.sk-pill { display: flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: rgba(255, 255, 255, .18); font-size: .85rem; font-weight: 600; white-space: nowrap; }\n.sk-dot { width: 9px; height: 9px; border-radius: 50%; background: #fecaca; }\n.sk-pill.on .sk-dot { background: #86efac; }\n.sk-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; transition: opacity .3s; }\n.sk-panel.stale { opacity: .45; }\n.sk-cell { padding: 18px 20px; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; margin: 0 -1px -1px 0; background: #fff; }\n.sk-cell.f-bad { background: #fef2f2; }\n.sk-lbl { display: flex; align-items: center; gap: 8px; font-size: .88rem; font-weight: 600; color: #475569; }\n.sk-val { font-size: 2.8rem; font-weight: 800; line-height: 1.1; margin-top: 8px; color: #0f172a; font-variant-numeric: tabular-nums; }\n.sk-val.sm { font-size: 1.6rem; line-height: 2.6rem; margin-top: 8px; }\n.sk-cell.f-ok .sk-val { color: #0f766e; }\n.sk-cell.f-bad .sk-val { color: #dc2626; }\n.sk-unit { font-size: 1rem; font-weight: 600; color: #64748b; margin-left: 6px; }\n.sk-note { margin-top: 6px; font-size: .82rem; color: #64748b; white-space: pre; }\n.beat { color: #dc2626; animation: sk-beat 1s infinite; }\n@keyframes sk-beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }\n@media (prefers-reduced-motion: reduce) { .sk-banner.is-alarm, .beat { animation: none; } }\n</style>\n",
+    "storeOutMessages": true,
+    "passthru": false,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 1130,
+    "y": 460,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "tpl_ctrl",
+    "type": "ui-template",
+    "z": "flux_sante_iot_01",
+    "group": "grp_controle",
+    "page": "",
+    "ui": "",
+    "name": "Commandes",
+    "order": 1,
+    "width": 12,
+    "height": 0,
+    "head": "",
+    "format": "<template>\n  <div class=\"ck\">\n    <v-btn block size=\"large\" color=\"warning\" variant=\"flat\" prepend-icon=\"mdi-bell-off\" :disabled=\"!s.alarmOn\" @click=\"cmd('silence')\">Couper l'alarme</v-btn>\n    <v-btn block size=\"large\" color=\"error\" variant=\"tonal\" prepend-icon=\"mdi-bell-ring\" @click=\"cmd('test')\">Tester l'alarme (5 s)</v-btn>\n    <v-btn block size=\"large\" :color=\"s.rec.on ? 'error' : 'success'\" variant=\"flat\" :prepend-icon=\"s.rec.on ? 'mdi-stop-circle' : 'mdi-record-circle'\" @click=\"cmd('toggle_rec')\">{{ s.rec.on ? \"Arrêter l'enregistrement\" : \"Démarrer l'enregistrement\" }}</v-btn>\n\n    <div class=\"ck-rec\" :class=\"{ live: s.rec.on }\">\n      <div class=\"ck-rec-h\"><span class=\"ck-led\"></span>{{ s.rec.on ? 'Enregistrement en cours' : 'Enregistrement arrêté' }}</div>\n      <template v-if=\"s.rec.file\">\n        <div class=\"ck-row\"><span>Fichier</span><b>{{ fileName }}</b></div>\n        <div class=\"ck-row\"><span>Lignes écrites</span><b>{{ s.rec.rows }}</b></div>\n        <div class=\"ck-row\"><span>Début</span><b>{{ s.rec.startedAt }}</b></div>\n        <a class=\"ck-dl\" href=\"/sante/export\" target=\"_blank\">Télécharger le dernier CSV</a>\n      </template>\n      <div v-else class=\"ck-hint\">Une ligne par minute : BPM, SpO2, accélération et état de l'alarme.</div>\n    </div>\n\n    <div class=\"ck-hint\">Bouton physique : <b>1 appui</b> coupe l'alarme, <b>2 appuis rapides</b> démarrent ou arrêtent l'enregistrement.</div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() { return { s: { alarmOn: false, rec: { on: false, file: '', rows: 0, startedAt: '' } } } },\n  computed: {\n    fileName() { return (this.s.rec.file || '').split('/').pop() }\n  },\n  methods: {\n    cmd(topic) { this.send({ topic: topic, payload: topic }) }\n  },\n  mounted() {\n    this.$socket.on('msg-input:' + this.id, (msg) => {\n      if (msg && msg.payload && typeof msg.payload === 'object') this.s = msg.payload\n    })\n  },\n  unmounted() {\n    this.$socket.off('msg-input:' + this.id)\n  }\n}\n</script>\n\n<style>\n.ck { display: flex; flex-direction: column; gap: 12px; }\n.ck-rec { border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; background: #f8fafc; }\n.ck-rec.live { border-color: #fca5a5; background: #fef2f2; }\n.ck-rec-h { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }\n.ck-led { width: 11px; height: 11px; border-radius: 50%; background: #94a3b8; }\n.ck-rec.live .ck-led { background: #dc2626; animation: ck-blink 1.2s infinite; }\n@keyframes ck-blink { 50% { opacity: .25; } }\n.ck-row { display: flex; justify-content: space-between; gap: 12px; font-size: .85rem; color: #475569; padding: 3px 0; }\n.ck-row b { color: #0f172a; font-weight: 600; text-align: right; overflow-wrap: anywhere; }\n.ck-dl { display: inline-block; margin-top: 8px; font-size: .88rem; font-weight: 600; color: #0369a1; text-decoration: underline; }\n.ck-hint { font-size: .82rem; color: #64748b; line-height: 1.4; }\n@media (prefers-reduced-motion: reduce) { .ck-rec.live .ck-led { animation: none; } }\n</style>\n",
+    "storeOutMessages": true,
+    "passthru": false,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 1130,
+    "y": 520,
+    "wires": [
+      [
+        "sw_router"
+      ]
+    ]
+  },
+  {
+    "id": "tpl_seuils",
+    "type": "ui-template",
+    "z": "flux_sante_iot_01",
+    "group": "grp_seuils",
+    "page": "",
+    "ui": "",
+    "name": "Seuils réglables",
+    "order": 1,
+    "width": 12,
+    "height": 0,
+    "head": "",
+    "format": "<template>\n  <div class=\"tk\">\n    <div class=\"tk-grid\">\n      <div class=\"tk-sec\" v-for=\"g in groups\" :key=\"g.title\">\n        <div class=\"tk-h\"><v-icon size=\"20\">{{ g.icon }}</v-icon>{{ g.title }}</div>\n        <v-text-field v-for=\"fd in g.fields\" :key=\"fd.k\" v-model.number=\"f[fd.k]\" type=\"number\" :label=\"fd.label\" :suffix=\"fd.unit\" :step=\"fd.step\" variant=\"outlined\" density=\"compact\" hide-details></v-text-field>\n      </div>\n    </div>\n    <div class=\"tk-actions\">\n      <v-btn color=\"primary\" variant=\"flat\" size=\"large\" prepend-icon=\"mdi-content-save\" @click=\"apply\">Enregistrer les seuils</v-btn>\n      <v-btn variant=\"text\" size=\"large\" prepend-icon=\"mdi-restore\" @click=\"reset\">Valeurs par défaut</v-btn>\n      <v-chip v-if=\"note\" :color=\"ok ? 'success' : 'error'\" variant=\"tonal\" label>{{ note }}</v-chip>\n    </div>\n  </div>\n</template>\n\n<script>\nexport default {\n  data() {\n    return {\n      f: { bpmMin: 45, bpmMax: 120, spo2Min: 92, accelMax: 18, accelMin: 3.5, snooze: 120, timeout: 30 },\n      note: '', ok: true, timer: null,\n      groups: [\n        { title: 'Rythme cardiaque', icon: 'mdi-heart-pulse', fields: [\n          { k: 'bpmMin', label: 'BPM minimum', unit: 'bpm', step: 1 },\n          { k: 'bpmMax', label: 'BPM maximum', unit: 'bpm', step: 1 } ] },\n        { title: 'Oxygénation', icon: 'mdi-water-percent', fields: [\n          { k: 'spo2Min', label: 'SpO2 minimum', unit: '%', step: 1 } ] },\n        { title: 'Mouvement et chute', icon: 'mdi-run-fast', fields: [\n          { k: 'accelMax', label: 'Choc au-dessus de', unit: 'm/s²', step: 0.5 },\n          { k: 'accelMin', label: 'Chute libre sous', unit: 'm/s²', step: 0.5 } ] },\n        { title: 'Alarme et système', icon: 'mdi-cog-outline', fields: [\n          { k: 'snooze', label: \"Durée de coupure de l'alarme\", unit: 's', step: 10 },\n          { k: 'timeout', label: 'Perte de communication après', unit: 's', step: 5 } ] }\n      ]\n    }\n  },\n  methods: {\n    apply() { this.send({ topic: 'set', payload: Object.assign({}, this.f) }) },\n    reset() { this.send({ topic: 'reset' }) },\n    show(ok, text) {\n      this.ok = ok; this.note = text\n      clearTimeout(this.timer)\n      if (text) this.timer = setTimeout(() => { this.note = '' }, 5000)\n    }\n  },\n  mounted() {\n    this.$socket.on('msg-input:' + this.id, (msg) => {\n      const p = msg && msg.payload\n      if (!p || msg.topic !== 'seuils') return\n      if (p.ok && p.values) this.f = Object.assign({}, p.values)\n      this.show(p.ok, p.message)\n    })\n    this.$nextTick(() => this.send({ topic: 'get' }))\n  },\n  unmounted() {\n    this.$socket.off('msg-input:' + this.id)\n    clearTimeout(this.timer)\n  }\n}\n</script>\n\n<style>\n.tk { display: flex; flex-direction: column; gap: 18px; }\n.tk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px; }\n.tk-sec { display: flex; flex-direction: column; gap: 12px; }\n.tk-h { display: flex; align-items: center; gap: 8px; font-weight: 700; color: #0f172a; }\n.tk-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }\n</style>\n",
+    "storeOutMessages": true,
+    "passthru": false,
+    "resendOnRefresh": true,
+    "templateScope": "local",
+    "className": "",
+    "x": 1130,
+    "y": 580,
+    "wires": [
+      [
+        "fn_seuils"
+      ]
+    ]
+  },
+  {
+    "id": "sw_router",
+    "type": "switch",
+    "z": "flux_sante_iot_01",
+    "name": "Enregistrement ou alarme ?",
+    "property": "topic",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "toggle_rec",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "false",
+    "repair": false,
+    "outputs": 2,
+    "x": 1130,
+    "y": 640,
+    "wires": [
+      [
+        "fn_recorder"
+      ],
+      [
+        "fn_engine"
+      ]
+    ]
+  },
+  {
+    "id": "c_exp",
+    "type": "comment",
+    "z": "flux_sante_iot_01",
+    "name": "4. Téléchargement du dernier CSV : http://IP:1880/sante/export",
+    "info": "",
+    "x": 250,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "http_in_export",
+    "type": "http in",
+    "z": "flux_sante_iot_01",
+    "name": "",
+    "url": "/sante/export",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 170,
+    "y": 760,
+    "wires": [
+      [
+        "fn_export_prep"
+      ]
+    ]
+  },
+  {
+    "id": "fn_export_prep",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Dernier fichier ?",
+    "func": "const rec = flow.get(\"rec\");\nif (!rec || !rec.file) {\n    msg.statusCode = 404;\n    msg.headers = { \"Content-Type\": \"text/plain; charset=utf-8\" };\n    msg.payload = \"Aucun enregistrement disponible.\";\n    return [null, msg];\n}\nmsg.filename = rec.file;\nreturn [msg, null];\n",
+    "outputs": 2,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 400,
+    "y": 760,
+    "wires": [
+      [
+        "file_in_export"
+      ],
+      [
+        "http_resp_export"
+      ]
+    ]
+  },
+  {
+    "id": "file_in_export",
+    "type": "file in",
+    "z": "flux_sante_iot_01",
+    "name": "Lire le CSV",
+    "filename": "filename",
+    "filenameType": "msg",
+    "format": "utf8",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "none",
+    "allProps": false,
+    "x": 620,
+    "y": 740,
+    "wires": [
+      [
+        "fn_export_head"
+      ]
+    ]
+  },
+  {
+    "id": "fn_export_head",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "En-têtes de téléchargement",
+    "func": "const rec = flow.get(\"rec\") || { file: \"mesures.csv\" };\nmsg.statusCode = 200;\nmsg.headers = {\n    \"Content-Type\": \"text/csv; charset=utf-8\",\n    \"Content-Disposition\": 'attachment; filename=\"' + String(rec.file).split(\"/\").pop() + '\"'\n};\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 850,
+    "y": 740,
+    "wires": [
+      [
+        "http_resp_export"
+      ]
+    ]
+  },
+  {
+    "id": "http_resp_export",
+    "type": "http response",
+    "z": "flux_sante_iot_01",
+    "name": "",
+    "statusCode": "",
+    "headers": {},
+    "x": 1100,
+    "y": 760,
+    "wires": []
+  },
+  {
+    "id": "catch_export",
+    "type": "catch",
+    "z": "flux_sante_iot_01",
+    "name": "",
+    "scope": [
+      "file_in_export"
+    ],
+    "uncaught": false,
+    "x": 620,
+    "y": 800,
+    "wires": [
+      [
+        "fn_export_err"
+      ]
+    ]
+  },
+  {
+    "id": "fn_export_err",
+    "type": "function",
+    "z": "flux_sante_iot_01",
+    "name": "Erreur 500",
+    "func": "msg.statusCode = 500;\nmsg.headers = { \"Content-Type\": \"text/plain; charset=utf-8\" };\nmsg.payload = \"Fichier introuvable ou illisible.\";\nreturn msg;\n",
+    "outputs": 1,
+    "timeout": 0,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 850,
+    "y": 800,
+    "wires": [
+      [
+        "http_resp_export"
+      ]
+    ]
+  },
+  {
+    "id": "global_cfg_sante",
+    "type": "global-config",
+    "env": [],
+    "modules": {
+      "@flowfuse/node-red-dashboard": "1.28.0"
+    }
+  }
 ]
