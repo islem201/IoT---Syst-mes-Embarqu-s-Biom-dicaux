@@ -1,9 +1,5 @@
-#  Système Embarqué Biomédical IoT — Monitoring Vital, Détection de Chute & Diagnostic I2C
+#  Système Embarqué Biomédical IoT
 
-![Statut](https://img.shields.io/badge/Statut-Opérationnel-brightgreen)
-![Plateforme](https://img.shields.io/badge/Hardware-3x%20ESP32%20%2B%20Raspberry%20Pi%204-blue)
-![Protocole](https://img.shields.io/badge/Protocole-I2C%20%7C%20MQTT%20%7C%20JSON-orange)
-![Supervision](https://img.shields.io/badge/Dashboard-Node--RED%202.0-red)
 
 Mini-projet réalisé dans le cadre de la formation d'ingénieur en **Informatique et Systèmes d'Information pour la Santé (ISIS — Castres, 2026)**.
 
